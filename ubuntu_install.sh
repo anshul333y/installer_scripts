@@ -3,7 +3,7 @@
 printf '\033c'
 
 # creating user-dirs
-mkdir -p code dl pub docs music pics vids ~/.local/share
+mkdir -p code dl pub docs music pics vids ~/.local/share && rm ~/.config/user-dirs.dirs
 
 # installing apt packages
 sudo apt install -y git zsh stow curl unzip \
@@ -18,7 +18,7 @@ sudo flatpak remote-add --if-not-exists flathub https://dl.flathub.org/repo/flat
 flatpak install --noninteractive flathub com.github.wwmm.easyeffects
 
 # changing shell to zsh
-sudo chsh -s /usr/bin/zsh
+chsh -s /usr/bin/zsh
 
 # installing LazyVim
 git clone https://github.com/LazyVim/starter ~/.config/nvim
@@ -38,7 +38,7 @@ git clone https://github.com/MichaelAquilina/zsh-you-should-use.git ${ZSH_CUSTOM
 curl -Lo ~/dl/font.zip "https://github.com/subframe7536/maple-font/releases/download/v7.4/MapleMono-NF-CN-unhinted.zip"
 unzip ~/dl/font.zip -d ~/dl/fonts && mv ~/dl/fonts ~/.local/share && fc-cache -fv && rm ~/dl/font.zip
 
-# Installing Kitty
+# installing kitty
 curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 cp ~/.local/kitty.app/share/applications/kitty.desktop ~/.local/share/applications/
 sed -i "s|Icon=kitty|Icon=$(readlink -f ~)/.local/kitty.app/share/icons/hicolor/256x256/apps/kitty.png|g" ~/.local/share/applications/kitty*.desktop
@@ -86,3 +86,6 @@ echo \
 sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 sudo usermod -aG docker $USER
+
+# post install steps
+rm .bash* .zshrc
