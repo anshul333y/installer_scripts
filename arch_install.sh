@@ -6,13 +6,24 @@ sed -i "s/^ParallelDownloads = 5$/ParallelDownloads = 15/" /etc/pacman.conf
 pacman --noconfirm -Sy archlinux-keyring
 loadkeys us
 timedatectl set-ntp true
-partition=/dev/nvme0n1p6
+
+# partitioning
+echo "Enter the linux partition: "
+read partition
+echo "Enter EFI partition: "
+read efipartition
+# partition=/dev/nvme0n1p6
+# efipartition=/dev/nvme0n1p5
+
+# format partitions
 mkfs.ext4 -F $partition
-efipartition=/dev/nvme0n1p5
 mkfs.fat -F 32 $efipartition
+
+# mount partitions
 mount $partition /mnt
 mkdir -p /mnt/boot/efi
 mount $efipartition /mnt/boot/efi
+
 pacstrap /mnt base base-devel linux linux-firmware
 genfstab -U /mnt >>/mnt/etc/fstab
 sed '1,/^#part2$/d' $(basename $0) >/mnt/arch_install2.sh
