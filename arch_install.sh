@@ -2,9 +2,17 @@
 
 #part1
 printf '\033c'
+
+# set parallel downloads to 15
 sed -i "s/^ParallelDownloads = 5$/ParallelDownloads = 15/" /etc/pacman.conf
+
+# update keyring and sync package databases
 pacman --noconfirm -Sy archlinux-keyring
+
+# set keyboard layout to us
 loadkeys us
+
+# enable network time sync
 timedatectl set-ntp true
 
 # partitioning
@@ -24,8 +32,13 @@ mount $partition /mnt
 mkdir -p /mnt/boot/efi
 mount $efipartition /mnt/boot/efi
 
-pacstrap /mnt base base-devel linux linux-firmware
+# install base system
+pacstrap -K /mnt base base-devel linux linux-firmware
+
+# generate fstab
 genfstab -U /mnt >>/mnt/etc/fstab
+
+# run second stage of installer inside chroot
 sed '1,/^#part2$/d' $(basename $0) >/mnt/arch_install2.sh
 chmod +x /mnt/arch_install2.sh
 arch-chroot /mnt ./arch_install2.sh
@@ -33,30 +46,37 @@ exit
 
 #part2
 printf '\033c'
-pacman -S --noconfirm sed
+
+# set parallel downloads to 15
 sed -i "s/^ParallelDownloads = 5$/ParallelDownloads = 15/" /etc/pacman.conf
+
+# set system timezone
 ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
+
+# set hardware clock from system time
 hwclock --systohc
+
+# enable english locale
 echo "en_US.UTF-8 UTF-8" >>/etc/locale.gen
 locale-gen
+
+# set system-wide locale and keymap
 echo "LANG=en_US.UTF-8" >/etc/locale.conf
 echo "KEYMAP=us" >/etc/vconsole.conf
+
+# set hostname
 hostname=archlinux
 echo $hostname >/etc/hostname
+
+# configure hosts file
 echo "127.0.0.1       localhost" >>/etc/hosts
 echo "::1             localhost" >>/etc/hosts
 echo "127.0.1.1       $hostname.localdomain $hostname" >>/etc/hosts
+
+# generate initramfs image
 mkinitcpio -P
 
-# password
-echo "Enter the root password : "
-read root_pass
-echo "Enter the user password : "
-read user_pass
-# root_pass=your_root_password
-# user_pass=your_user_password
-echo "root:$root_pass" | chpasswd
-
+# install and configure grub with custom boot params
 pacman --noconfirm -S grub efibootmgr os-prober
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
 sed -i 's/quiet/pci=noaer/g' /etc/default/grub
@@ -80,13 +100,28 @@ systemctl enable NetworkManager.service
 systemctl enable bluetooth.service
 systemctl enable cronie.service
 
+# replace default shell with dash
 rm /bin/sh
 ln -s dash /bin/sh
+
+# allow wheel group to use sudo without a password
 echo "%wheel ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
+
+# create a new user and add to wheel group
 username=anshul333y
 useradd -m -G wheel -s /bin/zsh $username
+
+# set root and user passwords
+echo "Enter the root password : "
+read root_pass
+echo "Enter the user password : "
+read user_pass
+# root_pass=your_root_password
+# user_pass=your_user_password
+echo "root:$root_pass" | chpasswd
 echo "$username:$user_pass" | chpasswd
-echo "Pre-Installation Finish Reboot now"
+
+# run third stage of installer as user
 ai3_path=/home/$username/arch_install3.sh
 sed '1,/^#part3$/d' arch_install2.sh >$ai3_path
 chown $username:$username $ai3_path
