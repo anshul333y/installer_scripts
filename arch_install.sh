@@ -47,8 +47,10 @@ exit
 #part2
 printf '\033c'
 
-# set parallel downloads to 15
+# configure pacman
 sed -i "s/^ParallelDownloads = 5$/ParallelDownloads = 15/" /etc/pacman.conf
+sed -i "s/^#Color$/Color/" /etc/pacman.conf
+sed -i "/^#DisableSandbox/a ILoveCandy" /etc/pacman.conf
 
 # set system timezone
 ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
