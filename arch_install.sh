@@ -47,7 +47,16 @@ echo "127.0.0.1       localhost" >>/etc/hosts
 echo "::1             localhost" >>/etc/hosts
 echo "127.0.1.1       $hostname.localdomain $hostname" >>/etc/hosts
 mkinitcpio -P
-passwd
+
+# password
+echo "Enter the root password : "
+read root_pass
+echo "Enter the user password : "
+read user_pass
+# root_pass=your_root_password
+# user_pass=your_user_password
+echo "root:$root_pass" | chpasswd
+
 pacman --noconfirm -S grub efibootmgr os-prober
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
 sed -i 's/quiet/pci=noaer/g' /etc/default/grub
@@ -76,7 +85,7 @@ ln -s dash /bin/sh
 echo "%wheel ALL=(ALL) NOPASSWD: ALL" >>/etc/sudoers
 username=anshul333y
 useradd -m -G wheel -s /bin/zsh $username
-passwd $username
+echo "$username:$user_pass" | chpasswd
 echo "Pre-Installation Finish Reboot now"
 ai3_path=/home/$username/arch_install3.sh
 sed '1,/^#part3$/d' arch_install2.sh >$ai3_path
