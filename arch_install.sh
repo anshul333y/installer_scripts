@@ -79,8 +79,13 @@ mkinitcpio -P
 # install and configure grub with custom boot params
 pacman --noconfirm -S grub efibootmgr os-prober
 grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
-sed -i 's/quiet/pci=noaer/g' /etc/default/grub
-sed -i 's/GRUB_TIMEOUT=5/GRUB_TIMEOUT=1/g' /etc/default/grub
+sed -i 's|GRUB_DEFAULT=0|GRUB_DEFAULT=saved|' /etc/default/grub
+sed -i 's|GRUB_TIMEOUT=5|GRUB_TIMEOUT=1|' /etc/default/grub
+sed -i 's|quiet|pci=noaer|' /etc/default/grub
+sed -i 's|#GRUB_COLOR_NORMAL="light-blue/black"|GRUB_COLOR_NORMAL="light-blue/black"|' /etc/default/grub
+sed -i 's|#GRUB_COLOR_HIGHLIGHT="light-cyan/blue"|GRUB_COLOR_HIGHLIGHT="light-green/black"|' /etc/default/grub
+sed -i 's|#GRUB_SAVEDEFAULT=true|GRUB_SAVEDEFAULT=true|' /etc/default/grub
+sed -i 's|#GRUB_DISABLE_OS_PROBER=false|GRUB_DISABLE_OS_PROBER=false|' /etc/default/grub
 grub-mkconfig -o /boot/grub/grub.cfg
 
 # installing pacman packages
